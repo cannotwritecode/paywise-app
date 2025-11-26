@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+@theme {
+  /* 
+   * PREMIUM COLOR SYSTEM (HSL)
+   * Primary: Emerald Green (Trust, Growth, Money)
+   */
+  --color-primary: hsl(151 55% 41.5%);      /* #16a34a */
+  --color-primary-foreground: hsl(0 0% 100%);
+  
+  --color-background: hsl(0 0% 100%);       /* Pure White */
+  --color-foreground: hsl(240 10% 3.9%);    /* #09090b */
+
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(240 10% 3.9%);
+
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(240 10% 3.9%);
+
+  --color-secondary: hsl(240 4.8% 95.9%);   /* #f4f4f5 */
+  --color-secondary-foreground: hsl(240 5.9% 10%);
+
+  --color-muted: hsl(240 4.8% 95.9%);
+  --color-muted-foreground: hsl(240 3.8% 46.1%);
+
+  --color-accent: hsl(240 4.8% 95.9%);
+  --color-accent-foreground: hsl(240 5.9% 10%);
+
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+
+  --color-border: hsl(240 5.9% 90%);
+  --color-input: hsl(240 5.9% 90%);
+  --color-ring: hsl(151 55% 41.5%);
+
+  --radius: 0.75rem;
+
+  /* Custom Premium Tokens */
+  --color-success: hsl(142 76% 36%);
+  --color-warning: hsl(38 92% 50%);
+  --color-info: hsl(221 83% 53%);
+  
+  /* Layout */
+  --header-height: 4rem;
+  --bottom-nav-height: 4rem;
+
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+}
+
+/* Dark Mode Overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: hsl(240 10% 3.9%);    /* #09090b */
+    --color-foreground: hsl(0 0% 98%);
+
+    --color-card: hsl(240 10% 3.9%);
+    --color-card-foreground: hsl(0 0% 98%);
+
+    --color-popover: hsl(240 10% 3.9%);
+    --color-popover-foreground: hsl(0 0% 98%);
+
+    --color-primary: hsl(151 55% 41.5%);
+    --color-primary-foreground: hsl(0 0% 100%);
+
+    --color-secondary: hsl(240 3.7% 15.9%);
+    --color-secondary-foreground: hsl(0 0% 98%);
+
+    --color-muted: hsl(240 3.7% 15.9%);
+    --color-muted-foreground: hsl(240 5% 64.9%);
+
+    --color-accent: hsl(240 3.7% 15.9%);
+    --color-accent-foreground: hsl(0 0% 98%);
+
+    --color-destructive: hsl(0 62.8% 30.6%);
+    --color-destructive-foreground: hsl(0 0% 98%);
+
+    --color-border: hsl(240 3.7% 15.9%);
+    --color-input: hsl(240 3.7% 15.9%);
+    --color-ring: hsl(151 55% 41.5%);
+  }
+}
+
+/* Manual Dark Mode Class Support */
+.dark {
+  --color-background: hsl(240 10% 3.9%);
+  --color-foreground: hsl(0 0% 98%);
+  --color-card: hsl(240 10% 3.9%);
+  --color-card-foreground: hsl(0 0% 98%);
+  --color-popover: hsl(240 10% 3.9%);
+  --color-popover-foreground: hsl(0 0% 98%);
+  --color-primary: hsl(151 55% 41.5%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(240 3.7% 15.9%);
+  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(240 3.7% 15.9%);
+  --color-muted-foreground: hsl(240 5% 64.9%);
+  --color-accent: hsl(240 3.7% 15.9%);
+  --color-accent-foreground: hsl(0 0% 98%);
+  --color-destructive: hsl(0 62.8% 30.6%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(240 3.7% 15.9%);
+  --color-input: hsl(240 3.7% 15.9%);
+  --color-ring: hsl(151 55% 41.5%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Smooth Scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* 
+   * GLASSMORPHISM UTILITIES 
+   * The secret sauce for the "Premium" feel
+   */
+  .glass {
+    @apply bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-sm;
+  }
+  
+  .glass-card {
+    @apply bg-white/50 dark:bg-black/50 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .glass-nav {
+    @apply bg-white/80 dark:bg-black/80 backdrop-blur-lg border-b border-border/50 sticky top-0 z-50;
+  }
+
+  /* 
+   * TYPOGRAPHY 
+   */
+  .h1 {
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl font-display;
+  }
+
+  .h2 {
+    @apply scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 font-display;
+  }
+
+  .h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight font-display;
+  }
+
+  .h4 {
+    @apply scroll-m-20 text-xl font-semibold tracking-tight font-display;
+  }
+
+  .p {
+    @apply leading-7 [&:not(:first-child)]:mt-6 text-muted-foreground;
+  }
+
+  /* 
+   * ANIMATIONS 
+   */
+  .animate-in {
+    animation: enter 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  @keyframes enter {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* 
+ * CUSTOM SCROLLBAR 
+ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+}

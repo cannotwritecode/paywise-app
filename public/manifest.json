@@ -1,0 +1,8 @@
+{
+  "name": "Paywise - Fair Prices Together",
+  "short_name": "Paywise",
+  "theme_color": "#3B82F6",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "start_url": "/"
+}

@@ -1,0 +1,11 @@
+Please update the `GET /api/v1/users/:id/rewards` endpoint to include a `description` field for each badge in the `badges` array. This is used in the frontend UI.
+Example:
+```json
+{
+  "id": "1",
+  "name": "First Price",
+  "description": "Submit your first price",
+  "icon": "/badges/first.png",
+  "achieved": true
+}
+```
