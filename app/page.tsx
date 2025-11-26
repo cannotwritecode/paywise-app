@@ -189,7 +189,7 @@ export default function HomePage() {
 
         {/* Sponsored Ad */}
         <div className="animate-in fade-in slide-in-from-bottom-9 duration-1000 delay-400">
-          <AdContainer category="general" />
+          <AdContainer />
         </div>
 
         {/* Trending Section */}

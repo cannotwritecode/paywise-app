@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Gift, Trophy, Star, TrendingUp, Lock, CheckCircle2, Crown } from "lucide-react";
 import { AppShell } from "@/src/components/layout/AppShell";
+import AdContainer from "@/components/ads/AdContainer";
 import { Card } from "@/src/components/common/Card";
 import { Button } from "@/src/components/common/Button";
 import { apiClient, setApiToken } from "@/src/lib/api";
@@ -129,6 +130,11 @@ export default function RewardsPage() {
               </Card>
             ))}
           </div>
+        </div>
+
+        {/* Sponsored Ad */}
+        <div className="py-2">
+          <AdContainer />
         </div>
 
         {/* Rewards List */}

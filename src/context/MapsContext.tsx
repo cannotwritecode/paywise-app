@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { useJsApiLoader } from "@react-google-maps/api";
+
 
 interface Location {
   lat: number;
@@ -19,17 +19,16 @@ interface MapsContextType {
 
 const MapsContext = createContext<MapsContextType | undefined>(undefined);
 
-const LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = ["places"];
-
 export function MapsProvider({ children }: { children: ReactNode }) {
   const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [userAddress, setUserAddress] = useState<string | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries: LIBRARIES,
-  });
+  useEffect(() => {
+    // Simulate loading state for consistency with consumers
+    setIsLoaded(true);
+  }, []);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -43,10 +42,7 @@ export function MapsProvider({ children }: { children: ReactNode }) {
       setUserLocation({ lat: latitude, lng: longitude });
       setGeoError(null);
       
-      // Reverse geocode immediately if maps loaded
-      if (isLoaded) {
-        geocodeLocation(latitude, longitude).then(setUserAddress);
-      }
+      geocodeLocation(latitude, longitude).then(setUserAddress);
     };
 
     const error = (err: GeolocationPositionError) => {
@@ -65,21 +61,25 @@ export function MapsProvider({ children }: { children: ReactNode }) {
     };
 
     navigator.geolocation.getCurrentPosition(success, error, options);
-  }, [isLoaded]);
+  }, []);
 
   const geocodeLocation = async (lat: number, lng: number): Promise<string | null> => {
-    if (!isLoaded || !window.google) return null;
+    const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
+    if (!apiKey) {
+      console.warn("Geoapify API key not found");
+      return null;
+    }
 
     try {
-      const geocoder = new window.google.maps.Geocoder();
-      const response = await geocoder.geocode({ location: { lat, lng } });
+      const response = await fetch(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=${apiKey}`
+      );
+      const data = await response.json();
       
-      if (response.results[0]) {
-        // Try to find city/locality
-        const addressComponent = response.results[0].address_components.find(
-          (component) => component.types.includes("locality")
-        );
-        return addressComponent ? addressComponent.long_name : response.results[0].formatted_address;
+      if (data.features && data.features.length > 0) {
+        const properties = data.features[0].properties;
+        // Prefer city/town/village, fallback to formatted address
+        return properties.city || properties.town || properties.village || properties.formatted;
       }
       return null;
     } catch (error) {
@@ -92,7 +92,7 @@ export function MapsProvider({ children }: { children: ReactNode }) {
     <MapsContext.Provider
       value={{
         isLoaded,
-        loadError,
+        loadError: undefined,
         userLocation,
         userAddress,
         geoError,

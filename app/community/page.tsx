@@ -121,7 +121,7 @@ export default function CommunityPage() {
 
         {/* Sponsored Ad */}
         <div className="mb-6">
-          <AdContainer category="retail" />
+          <AdContainer />
         </div>
 
         {/* Feed */}

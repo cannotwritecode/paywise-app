@@ -1,14 +1,21 @@
 "use client";
 
-import React from "react";
-import { GoogleMap, Marker } from "@react-google-maps/api";
+import React, { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { useMaps } from "@/src/context/MapsContext";
 
-const containerStyle = {
-  width: "100%",
-  height: "400px",
-  borderRadius: "0.5rem",
-};
+// Fix Leaflet marker icon issue
+const icon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 const defaultCenter = {
   lat: 40.7128, // New York
@@ -20,32 +27,54 @@ interface MapComponentProps {
   showUserLocation?: boolean;
 }
 
+function MapUpdater({ center }: { center: { lat: number; lng: number } }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView([center.lat, center.lng], map.getZoom());
+  }, [center, map]);
+  return null;
+}
+
 export default function MapComponent({ height = "400px", showUserLocation = true }: MapComponentProps) {
-  const { isLoaded, loadError, userLocation } = useMaps();
+  const { userLocation } = useMaps();
+  const [isMounted, setIsMounted] = useState(false);
 
-  if (loadError) {
-    return <div className="p-4 bg-red-50 text-red-500 rounded-lg">Error loading maps</div>;
-  }
-
-  if (!isLoaded) {
-    return <div className="p-4 bg-gray-100 animate-pulse rounded-lg h-[400px]">Loading Maps...</div>;
-  }
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const center = showUserLocation && userLocation ? userLocation : defaultCenter;
+  const apiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
+
+  if (!isMounted) {
+    return <div className="bg-muted animate-pulse rounded-lg" style={{ height }} />;
+  }
+
+  if (!apiKey) {
+    return (
+      <div className="flex items-center justify-center bg-muted rounded-lg text-muted-foreground" style={{ height }}>
+        Map configuration missing
+      </div>
+    );
+  }
 
   return (
-    <GoogleMap
-      mapContainerStyle={{ ...containerStyle, height }}
-      center={center}
-      zoom={14}
-      options={{
-        disableDefaultUI: false,
-        zoomControl: true,
-        streetViewControl: false,
-        mapTypeControl: false,
-      }}
-    >
-      {showUserLocation && userLocation && <Marker position={userLocation} />}
-    </GoogleMap>
+    <div style={{ height, width: "100%", borderRadius: "0.5rem", overflow: "hidden" }}>
+      <MapContainer
+        center={[center.lat, center.lng]}
+        zoom={13}
+        style={{ height: "100%", width: "100%" }}
+        scrollWheelZoom={false}
+      >
+        <TileLayer
+          attribution='Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | © OpenStreetMap <a href="https://www.openstreetmap.org/copyright" target="_blank">contributors</a>'
+          url={`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`}
+        />
+        {showUserLocation && userLocation && (
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={icon} />
+        )}
+        <MapUpdater center={center} />
+      </MapContainer>
+    </div>
   );
 }

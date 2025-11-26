@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 import { Manrope, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "@/src/components/providers/Providers";
-import { ThemeProvider } from "next-themes"; // NEW: For dark mode
-import { Toaster } from "sonner"; // NEW: For global notifications
 import "./globals.css";
 
 // This font setup is perfect. No changes needed.
@@ -39,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     // The font variable injection is perfect.
-    <html lang="en" className={`${manrope.variable} ${inter.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
         {/*
           NEW: World-class PWA viewport.
@@ -72,29 +70,10 @@ export default function RootLayout({
         We've just wrapped the body's children in our ThemeProvider.
       */}
       <body className="font-sans antialiased bg-background text-foreground">
-        {/*
-          NEW: ThemeProvider
-          - Enables dark mode toggling based on system or user preference.
-          - `attribute="class"` tells it to add `class="dark"` to the <html> tag.
-          - `defaultTheme="system"` is best practice.
-        */}
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Providers>{children}</Providers>
+        <Providers>
+          {children}
           <Analytics />
-
-          {/*
-            NEW: Global Toaster
-            - Renders our non-blocking `toast()` notifications.
-            - `richColors` matches our v2.1 system's look and feel.
-            - We only need to define this *once* in the whole app.
-          */}
-          <Toaster richColors position="top-right" />
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { User as UserIcon, Mail, Edit2, LogOut, Settings, ChevronRight, Shield, Award, Code2 } from "lucide-react";
+import { useTheme } from "next-themes";
+import { User as UserIcon, Mail, Edit2, LogOut, Settings, ChevronRight, Shield, Award, Code2, Sun, Moon } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { AppShell } from "@/src/components/layout/AppShell";
 import { Button } from "@/src/components/common/Button";
@@ -11,6 +12,7 @@ import { useNotifications } from "@/src/hooks/useNotifications";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const { theme, setTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   const { isSubscribed, subscribe, unsubscribe } = useNotifications();
 
@@ -105,32 +107,53 @@ export default function ProfilePage() {
         <div className="space-y-4">
           <h3 className="font-semibold text-lg px-2">Settings</h3>
           
-          <div className="space-y-2">
-            <button className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <UserIcon size={20} />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-foreground">Personal Information</p>
-                  <p className="text-xs text-muted-foreground">Update your details</p>
-                </div>
-              </div>
-              <ChevronRight size={18} className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
-            </button>
-
-            <button className="w-full flex items-center justify-between p-4 rounded-xl bg-card border border-border/50 hover:border-primary/50 hover:shadow-md transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <Settings size={20} />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-foreground">Preferences</p>
-                  <p className="text-xs text-muted-foreground">App settings</p>
+            {/* Theme Toggle */}
+            <div className="p-4 rounded-xl bg-card border border-border/50 hover:border-primary/50 hover:shadow-md transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground">
+                    <Sun size={20} className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon size={20} className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-foreground">Appearance</p>
+                    <p className="text-xs text-muted-foreground">Customize app theme</p>
+                  </div>
                 </div>
               </div>
-              <ChevronRight size={18} className="text-muted-foreground group-hover:translate-x-1 transition-transform" />
-            </button>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setTheme("light")}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                    theme === "light"
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  Light
+                </button>
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                    theme === "dark"
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  Dark
+                </button>
+                <button
+                  onClick={() => setTheme("system")}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                    theme === "system"
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background hover:bg-muted border-border"
+                  }`}
+                >
+                  System
+                </button>
+              </div>
+            </div>
 
             <button 
               onClick={() => {
@@ -191,7 +214,6 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
-      </div>
     </AppShell>
   );
 }

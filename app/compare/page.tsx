@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, BarChart3, Map, List, Filter, MapPin, Bell } from "lucide-react";
 import { AppShell } from "@/src/components/layout/AppShell";
+import AdContainer from "@/components/ads/AdContainer";
 import { Input } from "@/src/components/common/Input";
 import { PriceCard } from "@/src/components/price/PriceCard";
 import { Card } from "@/src/components/common/Card";
@@ -151,6 +152,11 @@ export default function ComparePage() {
               </select>
             </div>
           </div>
+        </div>
+
+        {/* Sponsored Ad */}
+        <div className="md:hidden">
+           <AdContainer />
         </div>
 
         {/* Content Area */}

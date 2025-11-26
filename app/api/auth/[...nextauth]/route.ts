@@ -1,6 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
+import apiClient from "@/src/lib/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
@@ -19,7 +20,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Call backend login API
-          const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+          const response = await apiClient.post(`${API_BASE_URL}/auth/login`, {
             email: credentials.email,
             password: credentials.password,
           });
@@ -31,6 +32,7 @@ export const authOptions: NextAuthOptions = {
               id: user.id,
               name: user.name,
               email: user.email,
+              role: user.role, // Capture role from backend
               image: user.avatar || null,
               location: user.location,
               reputation: user.reputation,
@@ -57,6 +59,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = user.role; // Persist role to token
         token.location = (user as any).location;
         token.reputation = (user as any).reputation;
         token.rewardsBalance = (user as any).rewardsBalance;
@@ -68,6 +71,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).id = token.id;
+        (session.user as any).role = token.role; // Expose role in session
         (session.user as any).location = token.location;
         (session.user as any).reputation = token.reputation;
         (session.user as any).rewardsBalance = token.rewardsBalance;

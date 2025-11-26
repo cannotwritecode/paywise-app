@@ -34,6 +34,8 @@ function useHydration() {
   return isHydrated;
 }
 
+import AdContainer from "@/components/ads/AdContainer";
+
 export function AppShell({ children, hideNavigation }: AppShellProps) {
   const isHydrated = useHydration();
 
@@ -51,8 +53,29 @@ export function AppShell({ children, hideNavigation }: AppShellProps) {
           !hideNavigation ? "pt-[var(--header-height)] pb-[var(--bottom-nav-height)]" : ""
         }`}
       >
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {children}
+        <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-8">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 min-w-0">
+            {children}
+          </div>
+
+          {/* Desktop Ad Sidebar */}
+          <aside className="hidden lg:block space-y-6 pt-4">
+            <div className="sticky top-[calc(var(--header-height)+2rem)]">
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-card border shadow-sm">
+                  <h3 className="font-semibold mb-2 text-sm text-muted-foreground">Sponsored</h3>
+                  <AdContainer />
+                </div>
+                <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/10">
+                  <h3 className="font-bold text-primary mb-1">Advertise Here</h3>
+                  <p className="text-xs text-muted-foreground mb-3">Reach thousands of local shoppers.</p>
+                  <button className="text-xs font-medium bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:bg-primary/90 transition-colors w-full">
+                    Contact Sales
+                  </button>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
       </main>
 

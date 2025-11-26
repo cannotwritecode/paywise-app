@@ -1,13 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useMaps } from "@/src/context/MapsContext";
 import { apiClient } from "@/src/lib/api";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 interface AdData {
   id: string;
@@ -24,43 +32,9 @@ interface AdContainerProps {
   className?: string;
 }
 
-export default function AdContainer({ category = "general", className }: AdContainerProps) {
-  const { userLocation, isLoaded } = useMaps();
-  const [ad, setAd] = useState<AdData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchAd = async () => {
-      setLoading(true);
-      try {
-        const params: any = { category };
-        
-        if (userLocation) {
-          params.lat = userLocation.lat;
-          params.lng = userLocation.lng;
-        }
-
-        const { data } = await apiClient.get("/ads", { params });
-        if (data.ad) {
-          setAd(data.ad);
-        }
-      } catch (error) {
-        console.error("Failed to fetch ad:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isLoaded || !isLoaded) { 
-       const timer = setTimeout(fetchAd, 1000);
-       return () => clearTimeout(timer);
-    }
-  }, [category, userLocation, isLoaded]);
-
+function AdCard({ ad }: { ad: AdData }) {
   const handleAdClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!ad) return;
-
     try {
       const { data } = await apiClient.post(`/ads/${ad.id}/click`);
       if (data.url) {
@@ -68,20 +42,13 @@ export default function AdContainer({ category = "general", className }: AdConta
       }
     } catch (error) {
       console.error("Failed to record click:", error);
-      // Fallback to direct link if tracking fails
       window.open(ad.link_url, "_blank", "noopener,noreferrer");
     }
   };
 
-  if (loading) {
-    return <div className={`h-64 bg-muted/20 animate-pulse rounded-xl ${className}`} />;
-  }
-
-  if (!ad) return null;
-
   return (
-    <Card className={`overflow-hidden border-muted/40 shadow-sm hover:shadow-md transition-shadow ${className}`}>
-      <div className="relative h-40 w-full">
+    <Card className="overflow-hidden border-muted/40 shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+      <div className="relative h-40 w-full shrink-0">
         <Image
           src={ad.image_url}
           alt={ad.title}
@@ -102,12 +69,12 @@ export default function AdContainer({ category = "general", className }: AdConta
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent className="p-4 pt-0 flex-1">
         <p className="text-sm text-muted-foreground line-clamp-2">
           {ad.description}
         </p>
       </CardContent>
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 pt-0 mt-auto">
         <Button asChild className="w-full" variant="outline" onClick={handleAdClick}>
           <a href={ad.link_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
             Learn More <ExternalLink className="w-3 h-3" />
@@ -115,5 +82,103 @@ export default function AdContainer({ category = "general", className }: AdConta
         </Button>
       </CardFooter>
     </Card>
+  );
+}
+
+export default function AdContainer({ category, className }: AdContainerProps) {
+  const { userLocation, isLoaded } = useMaps();
+  const [ads, setAds] = useState<AdData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [api, setApi] = useState<CarouselApi>();
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      setLoading(true);
+      try {
+        const params: any = { limit: 5 }; // Request up to 5 ads
+        
+        // Only add category if it's provided and not "all"
+        if (category && category !== "all") {
+          params.category = category;
+        }
+        
+        if (userLocation) {
+          params.lat = userLocation.lat;
+          params.lng = userLocation.lng;
+        }
+
+        const { data } = await apiClient.get("/ads", { params });
+        
+        console.log("AdContainer response:", data); // DEBUG: Check what backend returns
+
+        // Handle both single ad and array of ads
+        if (data.ads && Array.isArray(data.ads)) {
+          console.log("Received multiple ads:", data.ads.length);
+          setAds(data.ads);
+        } else if (data.ad) {
+          console.log("Received single ad");
+          setAds([data.ad]);
+        } else {
+          setAds([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch ads:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Fetch immediately if loaded, or wait a bit if loading (to give geolocation a chance)
+    // But don't wait forever, fallback to global ads if location fails
+    const timer = setTimeout(fetchAds, isLoaded ? 0 : 1000);
+    return () => clearTimeout(timer);
+  }, [category, userLocation, isLoaded]);
+
+  // Autoplay functionality
+  useEffect(() => {
+    if (!api || ads.length <= 1) return;
+
+    const intervalId = setInterval(() => {
+      api.scrollNext();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [api, ads.length]);
+
+  if (loading) {
+    return <div className={`h-80 bg-muted/20 animate-pulse rounded-xl ${className}`} />;
+  }
+
+  if (ads.length === 0) return null;
+
+  if (ads.length === 1) {
+    return (
+      <div className={className}>
+        <AdCard ad={ads[0]} />
+      </div>
+    );
+  }
+
+  return (
+    <Carousel
+      setApi={setApi}
+      className={`w-full ${className}`}
+      opts={{
+        align: "start",
+        loop: true,
+      }}
+    >
+      <CarouselContent>
+        {ads.map((ad) => (
+          <CarouselItem key={ad.id}>
+            <AdCard ad={ad} />
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <div className="hidden sm:block">
+        <CarouselPrevious className="left-2" />
+        <CarouselNext className="right-2" />
+      </div>
+    </Carousel>
   );
 }
